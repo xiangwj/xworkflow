@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.asia.bomc.workflow.entity.Group;
 //test1
+//test
 @Component(value="orginizeDao")
 public class OrginizeDaoImp extends AbstractBaseDao {
 
