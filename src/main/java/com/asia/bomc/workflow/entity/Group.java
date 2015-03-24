@@ -18,7 +18,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.TableGenerator;
-
+//
 @Entity(name = "BOMC_PARTY_GROUP")
 public class Group implements Serializable {
 
