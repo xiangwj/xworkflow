@@ -1,0 +1,12 @@
+.ok {
+    background-image: url(../images/default/tree/drop-yes.gif) !important;
+}
+.cancel {
+    background-image: url(../images/cancel.png) !important;
+}
+.search {
+    background-image: url(../images/search.png) !important;
+}
+.edit_add {
+    background-image: url(../images/edit_add.png) !important;
+}

@@ -1,0 +1,439 @@
+
+/* 生成布局对象 */
+
+var cgl01 = new Ext.Panel({
+	layout : 'form',
+	columnWidth : 1.0,
+	anchor : '-20',
+	border : false,
+	items : [fld_task_title,fld_apply_info_json,fld_task_execute_user]
+});
+
+var cgl02 = new Ext.Panel({
+	layout : 'form',
+	columnWidth : .5,
+	anchor : '-20',
+	border : false,
+	items : [fld_exp_start_time]
+});
+var cgl03 = new Ext.Panel({
+	layout : 'form',
+	columnWidth : .5,
+	anchor : '-20',
+	border : false,
+	items : [fld_exp_end_time]
+});
+var cgl04 = new Ext.Panel({
+	layout : 'form',
+	columnWidth : 1.0,
+	anchor : '-20',
+	border : false,
+	items : [fld_description,fld_flow_attach]
+});
+fld_exp_start_time.on("change",function(obj,nv,ov){
+	var exp_start_time=fld_exp_start_time.getRawValue();
+  var exp_end_time = fld_exp_end_time.getRawValue();
+  var dt = new Date();
+	var tn = dt.format("Y-m-d H:i:s");
+  
+  if(exp_start_time<=tn){
+  		alert("【预期开始时间】必须大于当前时间");
+			fld_exp_start_time.setValue("");
+  }else if(exp_end_time!="" && exp_start_time>=exp_end_time) {
+			alert("【预期开始时间】必须小于【预期完成时间】");
+			fld_exp_end_time.setValue("");
+	}
+});
+
+fld_exp_end_time.on("change",function(obj,nv,ov){
+	var exp_start_time=fld_exp_start_time.getRawValue();
+  var exp_end_time = fld_exp_end_time.getRawValue();
+	if(exp_start_time!="" && exp_start_time>=exp_end_time) {
+			alert("【预期完成时间】必须大于【预期开始时间】");
+			fld_exp_end_time.setValue("");
+	}
+});
+
+var fieldset01 = new Ext.form.FieldSet({
+	collapsible: false,
+	layout : 'column',
+	anchor : '-20',
+	autoHeight:false,
+	title: '申请信息',
+	collapsed: false,
+	items :[cgl01,cgl02,cgl03,cgl04]
+});
+
+simple.add(fieldset01);
+
+simple.getForm().on("beforeaction",function(form, act){
+		if(form.findField("fld_task_title").getValue().trim()==''){
+		  alert('[工单标题]不得为空!');
+    	return false;
+		}
+
+		if(form.findField("fld_exp_start_time").getValue()==''){
+		  alert('[预期开始时间]不得为空!');
+    	return false;
+		}
+		if(form.findField("fld_exp_end_time").getValue()==''){
+		  alert('[预期结束时间]不得为空!');
+    	return false;
+		}	
+		if(form.findField("fld_description").getValue().trim()==''){
+		  alert('[描述]不得为空!');
+    	return false;
+		}					
+    var exp_start_time=fld_exp_start_time.getRawValue();
+    var exp_end_time = fld_exp_end_time.getRawValue();
+    var dt = new Date();
+		var tn = dt.format("Y-m-d H:i:s");
+	   if(exp_start_time<=tn){
+    		alert("【预期开始时间】必须大于当前时间");
+    		return false;
+    }else if(exp_start_time>=exp_end_time) {
+				alert("【预期开始时间】必须小于【计划完成时间】");
+				return false;	
+  	}
+  	var checkMachineInfoResult = checkMachineInfo();
+  	if(checkMachineInfoResult!=''){
+			alert(checkMachineInfoResult);
+  		return false;
+  	}
+  	
+  	return true;	
+});
+function checkMachineInfo(){
+debugger;
+  var validStr = "";
+	var machineArray = new Array();
+	var machines =  Ext.select("form input[name^=fld_v_machine_name_]");
+	for(var i=0;i<machines.getCount();i++){
+		 var machine = new Object();
+		 var index = machines.item(i).dom.name.substr("fld_v_machine_name_".length);
+		 machine.machinename = machines.item(i).getValue().trim();
+		 machine.ip =  Ext.select("form input[name=fld_v_ip_"+index+"]").item(0).getValue().trim();
+		 machine.cpunum =  Ext.select("form input[name=fld_v_cpunum_"+index+"]").item(0).getValue().trim();
+		 machine.memory =  Ext.select("form input[name=fld_v_memory_"+index+"]").item(0).getValue().trim();
+		 machine.storage =  Ext.select("form input[name=fld_v_storage_"+index+"]").item(0).getValue().trim();
+		 machine.opsystem =  Ext.select("form input[name=fld_v_opsystem_"+index+"]").item(0).getValue().trim();
+		 machine.maintainperson =  Ext.select("form input[name=fld_v_mainperson_"+index+"]").item(0).getValue().trim();
+		 machine.maintainpersonname =Ext.getCmp("fld_v_mainperson_desc_"+index).getRawValue().trim();
+		 machine.undersystem =  Ext.select("form input[name=fld_v_undersystem_"+index+"]").item(0).getValue().trim();
+		 machine.purpose =  Ext.select("form textarea[name=fld_v_purpose_"+index+"]").item(0).getValue().trim();
+		
+		machine.createhostip =  Ext.select("form input[name=fld_v_HostIp_"+index+"]").item(0).getValue().trim();
+		machine.createdesc =  Ext.select("form input[name=fld_v_createDesc_"+index+"]").item(0).getValue().trim();
+		
+		var exp=/^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
+		var ips = machine.createhostip.split(",");
+		for(var j=0;j<ips.length;j++){
+			if(exp.test(ips[j])==false){
+			 		validStr=validStr==''?'虚拟机信息'+(i+1)+'【宿主机IP】输入不合法':validStr+'\n虚拟机信息'+(i+1)+'【宿主机IP】输入不合法';
+			 		break;
+			}
+	 	}
+	 	if(machine.createdesc==''){
+	 		validStr=validStr==''?'虚拟机信息'+(i+1)+'【创建描述】为空':validStr+'\n虚拟机信息'+(i+1)+'【创建描述】为空';
+	 	}
+		 machineArray.push(machine);
+	}
+	fld_apply_info_json.setValue(Ext.encode(machineArray));
+	return validStr;
+}
+
+function addMachineInfo(machineInfoObj){
+
+	var machines =  Ext.query("form input[name^=fld_v_machine_name_]");
+	var machineIndex=0;
+	if(machines.length==0)
+	{
+		machines = 0;
+	}else{
+		for(var i=0;i<machines.length;i++){
+			if(parseInt(machines[i].name.substr("fld_v_machine_name_".length))>=machineIndex)
+				machineIndex=parseInt(machines[i].name.substr("fld_v_machine_name_".length))+1;
+		}
+	}
+	var machineSet = new Ext.form.FieldSet({
+		collapsible: false,
+		layout : 'column',
+		anchor : '-20',
+		autoHeight:false,
+		title: '虚拟机信息',
+		collapsed: false
+		
+	});
+	var applySet = new Ext.form.FieldSet({
+		collapsible: false,
+		layout : 'column',
+		anchor : '-20',
+		autoHeight:false,
+		title: '申请信息',
+		collapsed: false
+		
+	});	
+	var fldMachineName=new Ext.form.TextField({
+			name:'fld_v_machine_name_'+machineIndex,
+			fieldLabel:'主机名',
+			width:150,
+			anchor : '-20',
+			allowBlank:false,
+			editable:false,
+			readOnly:true
+	});
+	
+	var fldIp=new Ext.form.TextField({
+			name:'fld_v_ip_'+machineIndex,
+			fieldLabel:'IP',
+			width:150,
+			anchor : '-20',
+			allowBlank:false,
+			editable:false,
+			readOnly:true			
+	});
+	var fldCpuNum= new Ext.form.TextField({
+			name:'fld_v_cpunum_'+machineIndex,
+			fieldLabel:'CPU数量',
+			width:150,
+			anchor : '-20',
+			allowBlank:false,
+			editable:false,
+			readOnly:true				
+	});
+	var fldMemory= new Ext.form.TextField({
+			name:'fld_v_memory_'+machineIndex,
+			fieldLabel:'内存',
+			width:150,
+			anchor : '-20',
+			allowBlank:false,
+			editable:false,
+			readOnly:true				
+	});
+	var fldStorage= new Ext.form.TextField({
+			name:'fld_v_storage_'+machineIndex,
+			fieldLabel:'存储',
+			width:150,
+			anchor : '-20',
+			allowBlank:false,
+			editable:false,
+			readOnly:true				
+	});
+	var fldOpSystem= new Ext.form.TextField({
+			name:'fld_v_opsystem_'+machineIndex,
+			fieldLabel:'操作系统',
+			width:150,
+			anchor : '-20',
+			allowBlank:false,
+			editable:false,
+			readOnly:true				
+	});	
+var fldMaintainPerson = new Ext.form.SelectDialogField({
+	fieldLabel:"维护人员",
+	anchor : '-20',
+	id:'fld_v_mainperson_desc_'+machineIndex,
+	name:'fld_v_mainperson_'+machineIndex,
+	hiddenName :'fld_v_mainperson_'+machineIndex,
+	selectUrl:'/itsm3/configure/security/userSelectDialog.jsp',
+	editable :false,
+	storeName: false,
+	params: {groupType:3
+				,pathMode:false
+					},
+	emptyText:'请选择...',
+	desc:'',
+	width:150,
+	readOnly:true
+});	
+
+
+	var fldUnderSystem= new Ext.form.TextField({
+			name:'fld_v_undersystem_'+machineIndex,
+			fieldLabel:'所属系统',
+			width:150,
+			anchor : '-20',
+			allowBlank:false,
+			editable :false,
+			readOnly:true		
+	});	
+	var fldPurpose= new Ext.form.TextArea({
+			name:'fld_v_purpose_'+machineIndex,
+			fieldLabel:'用途',
+			width:150,
+			anchor : '-20',
+			allowBlank:false,
+			editable :false,
+			readOnly:true						
+	});		
+
+	var afp00 = new Ext.Panel({
+		layout : 'form',
+		columnWidth : .5,
+		anchor : '-20',
+		border : false,
+		labelWidth:85,
+		items : [fldMachineName]
+	});
+	var afp01 = new Ext.Panel({
+		layout : 'form',
+		columnWidth : .5,
+		anchor : '-20',
+		border : false,
+		labelWidth:85,
+		items : [fldIp]
+	});
+	var afp02 = new Ext.Panel({
+		layout : 'form',
+		columnWidth : .5,
+		anchor : '-20',
+		border : false,
+		labelWidth:85,
+		items : [fldCpuNum]
+	});
+	var afp03 = new Ext.Panel({
+		layout : 'form',
+		columnWidth : .5,
+		anchor : '-20',
+		border : false,
+		labelWidth:85,
+		items : [fldMemory]
+	});	
+	var afp04 = new Ext.Panel({
+		layout : 'form',
+		columnWidth : .5,
+		anchor : '-20',
+		border : false,
+		labelWidth:85,
+		items : [fldStorage]
+	});
+	var afp05 = new Ext.Panel({
+		layout : 'form',
+		columnWidth : .5,
+		anchor : '-20',
+		border : false,
+		labelWidth:85,
+		items : [fldOpSystem]
+	});	
+	var afp06 = new Ext.Panel({
+		layout : 'form',
+		columnWidth : .5,
+		anchor : '-20',
+		border : false,
+		labelWidth:85,
+		items : [fldMaintainPerson]
+	});
+	var afp07 = new Ext.Panel({
+		layout : 'form',
+		columnWidth : .5,
+		anchor : '-20',
+		border : false,
+		labelWidth:85,
+		items : [fldUnderSystem]
+	});	
+	var afp08 = new Ext.Panel({
+		layout : 'form',
+		columnWidth : 1.0,
+		anchor : '-20',
+		border : false,
+		labelWidth:85,
+		items : [fldPurpose]
+	});
+									
+ 
+
+
+
+ 		
+	applySet.add(afp00);
+	applySet.add(afp01);
+	applySet.add(afp02);
+	applySet.add(afp03);
+	applySet.add(afp04);
+	applySet.add(afp05);
+	applySet.add(afp06);
+	applySet.add(afp07);
+	applySet.add(afp08);
+
+	machineSet.add(applySet);
+	simple.add(machineSet);
+	
+	var createSet = new Ext.form.FieldSet({
+		collapsible: false,
+		layout : 'column',
+		anchor : '-20',
+		autoHeight:false,
+		title: '创建虚拟机信息',
+		collapsed: false
+		
+	});
+	var fldHostIp= new Ext.form.TextField({
+			name:'fld_v_HostIp_'+machineIndex,
+			fieldLabel:'宿主机IP',
+			width:150,
+			anchor : '-20',
+			allowBlank:false
+	});
+	var fldCreateDesc= new Ext.form.TextField({
+			name:'fld_v_createDesc_'+machineIndex,
+			fieldLabel:'创建描述',
+			width:150,
+			anchor : '-20',
+			allowBlank:false
+	});				
+	var cfp00 = new Ext.Panel({
+		layout : 'form',
+		columnWidth : 1.0,
+		anchor : '-20',
+		border : false,
+		labelWidth:85,
+		items : [fldHostIp,fldCreateDesc]
+	});
+	createSet.add(cfp00);		
+	machineSet.add(createSet);	
+	
+	simple.doLayout();
+	if(machineInfoObj){
+		fldMachineName.setValue(machineInfoObj.machinename);
+		fldIp.setValue(machineInfoObj.ip);
+		fldCpuNum.setValue(machineInfoObj.cpunum);
+		fldMemory.setValue(machineInfoObj.memory);
+		fldStorage.setValue(machineInfoObj.storage);
+		fldOpSystem.setValue(machineInfoObj.opsystem);
+		fldMaintainPerson.setValue(machineInfoObj.maintainperson);
+		fldUnderSystem.setValue(machineInfoObj.undersystem);
+		fldPurpose.setValue(machineInfoObj.purpose);
+	}
+	
+
+	fldMaintainPerson.setValue(machineInfoObj.maintainperson+'='+machineInfoObj.maintainpersonname);
+	
+
+}
+fld_task_title.editable=false;
+fld_task_title.setReadOnly(true);
+
+fld_exp_start_time.editable =false;
+fld_exp_start_time.setReadOnly(true);
+
+fld_exp_end_time.editable =false;
+fld_exp_end_time.setReadOnly(true);
+
+fld_description.editable =false;
+fld_description.setReadOnly(true);
+
+fld_apply_info_json.hidden=true;
+fld_apply_info_json.hideLabel=true;
+fld_task_execute_user.hidden=true;
+fld_task_execute_user.hideLabel=true;
+
+
+Ext.onReady(function(){
+		fld_task_execute_user.setValue('virtual_machine_configor|*'); 
+		if(fld_apply_info_json.getValue()!=''){
+			var jsonArray = Ext.decode(fld_apply_info_json.getValue());
+			for(var i=0;i<jsonArray.length;i++){
+				addMachineInfo(jsonArray[i]);
+			}
+		}
+},this,{delay:100});
+

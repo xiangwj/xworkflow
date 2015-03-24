@@ -1,0 +1,19 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
+    version="1.0">
+    <persistence-unit name="workflow" transaction-type="RESOURCE_LOCAL" >
+         <class>com.asia.bomc.workflow.entity.UserLogin</class>
+         <class>com.asia.bomc.workflow.entity.Group</class>
+         <class>com.asia.bomc.workflow.entity.SecurityRole</class>
+         <class>com.asia.bomc.workflow.entity.SecurityPermission</class>
+         <class>com.asia.bomc.workflow.entity.PrivateRelationship</class>
+         <class>com.asia.bomc.workflow.entity.UserLoginRoleAssoc</class>
+         <class>com.asia.bomc.workflow.entity.SecurityPosition</class>
+         <class>com.asia.bomc.workflow.entity.UserLoginPositionAssoc</class>
+         <class>com.asia.bomc.workflow.entity.ConfigType</class>
+         <class>com.asia.bomc.workflow.entity.ConfigItem</class>
+    	<exclude-unlisted-classes />
+    </persistence-unit>
+</persistence>
+

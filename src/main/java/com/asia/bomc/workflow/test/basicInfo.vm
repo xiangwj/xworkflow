@@ -1,0 +1,126 @@
+##需要的变量
+##taskData
+##PersonManager
+##DateUtil
+##workflowData
+##StringUtil
+
+#set($wfInfo = $workflowData.getOwner())
+
+<script defer>
+var simple = new Ext.Panel({
+	autoScroll: true,
+	bodyStyle :{background: '#fafbfc','padding-top':'10px'},
+	borderStyle:'border 0 none',
+	defaultType: 'textfield',
+	region:'center'
+});
+
+#set($title = $taskData.getAttribute("task_title"))
+
+var titlePanel = new Ext.Panel({
+    anchor : '-20',
+    //borderStyle:'border none',
+	bodyStyle :{background: '#fafbfc','padding-top':'10px'},
+	border:false,
+	html:'<div style="font-size:35px;font-family:宋体,Arial;font-weight:bold;text-align:center;color:red;">${title}</div>'
+});
+
+simple.add(titlePanel);
+
+
+
+##==========基本信息===============
+
+#set($basicInfo = "<table class='embed2' border=0 cellspacing=1 width='100%' align='center'>")
+
+#set($basicInfo = "$basicInfo<tr>")
+#set($fieldInfo = $wfInfo.getField("task_oid"))
+#set($basicInfo = "$basicInfo<th class='customThCenter'>$fieldInfo.getName()</th><td width='23%'>$fieldInfo.createViewCode($taskData)</td>")
+#set($fieldInfo = $wfInfo.getField("task_title"))
+#set($basicInfo = "$basicInfo<th class='customThCenter'>$fieldInfo.getName()</th><td width='23%'>$fieldInfo.createViewCode($taskData)</td>")
+#set($fieldInfo = $wfInfo.getField("task_create_by"))
+#set($basicInfo = "$basicInfo<th class='customThCenter'>$fieldInfo.getName()</th><td width='23%'>$fieldInfo.createViewCode($taskData)</td>")
+#set($basicInfo = "$basicInfo</tr>")
+
+#set($basicInfo = "$basicInfo<tr>")
+#set($fieldInfo = $wfInfo.getField("exp_start_time"))
+#set($basicInfo = "$basicInfo<th class='customThCenter'>$fieldInfo.getName()</th><td>$fieldInfo.createViewCode($taskData)</td>")
+#set($fieldInfo = $wfInfo.getField("exp_end_time"))
+#set($basicInfo = "$basicInfo<th class='customThCenter'>$fieldInfo.getName()</th><td colspan='3'>$fieldInfo.createViewCode($taskData)</td>")
+#set($basicInfo = "$basicInfo</tr>")
+
+#set($basicInfo = "$basicInfo<tr>")
+#set($fieldInfo = $wfInfo.getField("description"))
+#set($basicInfo = "$basicInfo<th class='customThCenter'>$fieldInfo.getName()</th><td colspan='5'>$fieldInfo.createViewCode($taskData)</td>")
+#set($basicInfo = "$basicInfo</tr>")
+
+#set($basicInfo = "$basicInfo<tr>")
+#set($fieldInfo = $wfInfo.getField("flow_attach"))
+#set($basicInfo = "$basicInfo<th class='customThCenter'>$fieldInfo.getName()</th><td colspan='5'>$fieldInfo.createViewCode($taskData)</td>")
+#set($basicInfo = "$basicInfo</tr>")
+
+##=======================虚拟机信息=======================================
+#set($applyInfoJsonValue = $StringUtil.formatJSONArray($taskData.getAttribute("apply_info_json")))
+
+#set($alen = $applyInfoJsonValue.length() - 1)
+#foreach($i in [0..$alen]) 
+	#set($aJSON = $applyInfoJsonValue.getJSONObject($i))
+	
+	#set($machinename = $aJSON.getString("machinename"))
+	#set($ip = $aJSON.getString("ip"))
+	#set($cpunum = $aJSON.getString("cpunum"))
+	
+	#set($memory = $aJSON.getString("memory"))
+	#set($storage = $aJSON.getString("storage"))
+	#set($opsystem = $aJSON.getString("opsystem"))
+
+	#set($maintainperson = $aJSON.getString("maintainperson"))
+	#set($undersystem = $aJSON.getString("undersystem"))
+	#set($purpose = $aJSON.getString("purpose"))
+	#set ( $rownum = $i + 1 ) 
+	#set($basicInfo = "$basicInfo<tr>")
+	#set($basicInfo = "$basicInfo<th class='customThCenter'>虚拟机${rownum}</th><td colspan='5'></td>")
+	#set($basicInfo = "$basicInfo</tr>")
+	
+	#set($basicInfo = "$basicInfo<tr>")
+	#set($basicInfo = "$basicInfo<th class='customThCenter'>主机名</th><td>${machinename}</td>")
+	#set($basicInfo = "$basicInfo<th class='customThCenter'>IP</th><td >${ip}</td>")
+	#set($basicInfo = "$basicInfo<th class='customThCenter'>CPU数量</th><td >${cpunum}</td>")
+	#set($basicInfo = "$basicInfo</tr>")
+
+	#set($basicInfo = "$basicInfo<tr>")
+	#set($basicInfo = "$basicInfo<th class='customThCenter'>内存</th><td>${memory}</td>")
+	#set($basicInfo = "$basicInfo<th class='customThCenter'>存储</th><td >${storage}</td>")
+	#set($basicInfo = "$basicInfo<th class='customThCenter'>操作系统</th><td >${opsystem}</td>")
+	#set($basicInfo = "$basicInfo</tr>")
+	
+	#set($basicInfo = "$basicInfo<tr>")
+	#set($basicInfo = "$basicInfo<th class='customThCenter'>维护人员</th><td>${maintainperson}</td>")
+	#set($basicInfo = "$basicInfo<th class='customThCenter'>所属系统</th><td colspan='3'>${undersystem}</td>")
+	#set($basicInfo = "$basicInfo</tr>")
+	
+	#set($basicInfo = "$basicInfo<tr>")
+	#set($basicInfo = "$basicInfo<th class='customThCenter'>用途</th><td colspan='5'>${purpose}</td>")
+	#set($basicInfo = "$basicInfo</tr>")			
+#end
+
+#set($basicInfo = $StringUtil.escapeJavaScript($basicInfo))
+#set($basicInfo = $basicInfo.replaceAll("\\n","<br>"))
+#set($basicInfo = "$basicInfo</table>")
+
+
+var fieldset_basic = new Ext.form.FieldSet({
+	title:'基本信息',
+	anchor : '-20',
+	autoHeight:true,
+	cls:'coustomTabTitle',
+	style:"padding-top:10px;border:0px;",
+	html:"$basicInfo"
+});
+simple.add(fieldset_basic);
+
+
+
+
+</script>

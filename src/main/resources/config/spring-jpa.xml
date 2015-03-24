@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+	http://www.springframework.org/schema/tx    http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+	http://www.springframework.org/schema/aop   http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+	http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+	<context:annotation-config />
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:config/jdbcpool.properties" />
+	</bean>
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="${workflow.driverClass}" />
+		<property name="jdbcUrl" value="${workflow.jdbcUrl}" />
+		<property name="user" value="${workflow.user}" />
+		<property name="password" value="${workflow.password}" />
+		<property name="initialPoolSize" value="${workflow.initialPoolSize}" />
+		<property name="minPoolSize" value="${workflow.minPoolSize}" />
+		<property name="maxPoolSize" value="${workflow.maxPoolSize}" />
+		<property name="acquireIncrement" value="${workflow.acquireIncrement}" />
+		<property name="maxIdleTime" value="${workflow.maxIdleTime}" />
+		<property name="maxIdleTimeExcessConnections" value="${workflow.maxIdleTimeExcessConnections}" />
+		<property name="maxConnectionAge" value="${workflow.maxConnectionAge}" />
+		<property name="idleConnectionTestPeriod" value="${workflow.idleConnectionTestPeriod}" />
+		<property name="preferredTestQuery" value="${workflow.preferredTestQuery}" />
+		<property name="testConnectionOnCheckin" value="${workflow.testConnectionOnCheckin}" />
+		<property name="testConnectionOnCheckout" value="${workflow.testConnectionOnCheckout}" />
+		<property name="maxStatements" value="${workflow.maxStatements}" />
+		<property name="maxStatementsPerConnection" value="${workflow.maxStatementsPerConnection}" />
+		<property name="acquireRetryDelay" value="${workflow.acquireRetryDelay}" />
+		<property name="acquireRetryAttempts" value="${workflow.acquireRetryAttempts}" />
+		<property name="breakAfterAcquireFailure" value="${workflow.breakAfterAcquireFailure}" />
+	</bean>
+	<bean name="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="persistenceProvider" ref="persistenceProvider" />
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+		<property name="jpaDialect" ref="jpaDialect" />
+		<property name="persistenceUnitName" value="workflow"></property>
+		<property name="persistenceXmlLocation" value="classpath:config/persistence.xml"></property>
+		<property name="loadTimeWeaver">
+			<bean
+				class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver" />
+		</property>
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.connection.driver_class">${hibernate.connection.driver_class}</prop>
+				<prop key="hibernate.max_fetch_depth">${hibernate.max_fetch_depth}</prop>
+				<prop key="hibernate.jdbc.fetch_size">${hibernate.jdbc.fetch_size}</prop>
+				<prop key="hibernate.jdbc.batch_size">${hibernate.jdbc.batch_size}</prop>
+				<prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+				<prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+				<prop key="javax.persistence.validation.mode">${javax.persistence.validation.mode}</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="persistenceProvider" class="org.hibernate.ejb.HibernatePersistence" />
+	<bean id="jpaVendorAdapter"
+		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<property name="database" value="${jpaVendorAdapter.database}" />
+	</bean>
+	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+	<bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+	<tx:annotation-driven transaction-manager="txManager"/>
+</beans>	

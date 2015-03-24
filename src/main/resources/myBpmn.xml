@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process>
+	<start id="start" />
+	<flows>
+		<flow id="flow1" source="start" target="task" />
+		<flow id="flow2" source="task" target="end" />
+	</flows>
+	<tasks>
+		<task id="task" />
+	</tasks>
+	<end id="end" />
+</process>
