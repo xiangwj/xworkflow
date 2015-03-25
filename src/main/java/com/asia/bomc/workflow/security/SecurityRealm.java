@@ -19,6 +19,8 @@
 package com.asia.bomc.workflow.security;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -40,7 +42,7 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 import com.asia.bomc.workflow.entity.SecurityPermission;
 import com.asia.bomc.workflow.entity.SecurityRole;
 import com.asia.bomc.workflow.entity.UserLogin;
-import com.asia.bomc.workflow.exception.BomcServiceException;
+import com.asia.bomc.workflow.entity.UserLoginRoleAssoc;
 import com.asia.bomc.workflow.service.IUserService;
 import com.asia.bomc.workflow.utils.CollectionUtils;
 
@@ -54,27 +56,30 @@ public class SecurityRealm extends AuthorizingRealm {
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(
 			PrincipalCollection principals) {
-		/*UserLogin user = (UserLogin) getAvailablePrincipal(principals);
-		if (user != null) {
-			SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
-			Collection<SecurityRole> roles = user.getRoles();
-			if (!CollectionUtils.isEmpty(roles)) {
-				for (SecurityRole role : roles) {
-					info.addRole(role.getSecurityRoleId());
-					Collection<SecurityPermission> permissions = role
-							.getPermissions();
+		SimpleAuthorizationInfo info = null;
+		String currentUsername = (String)super.getAvailablePrincipal(principals);
+		List<UserLogin> users = UserService.findByUserName(currentUsername);
+		UserLogin user = null;
+		if(users.size()>0){
+			user =  users.get(0);
+			info = new SimpleAuthorizationInfo();
+			Set<UserLoginRoleAssoc> userRoleAssocs = user.getUserLoginRoleAssocs();
+			
+			if (!CollectionUtils.isEmpty(userRoleAssocs)) {
+				for (UserLoginRoleAssoc assoc : userRoleAssocs) {
+					
+					info.addRole(assoc.getId().getRoleId());
+					Collection<SecurityPermission> permissions = assoc.getRole().getPermissions();
 					if (!CollectionUtils.isEmpty(permissions)) {
 						for (SecurityPermission permission : permissions)
 							info.addStringPermission(permission
 									.getPermissionId());
 					}
 				}
-			}
-			return info;
-		} else {
-			return null;
-		}*/
-		return null;
+			}			
+		}
+
+		return info;
 	}
 
 	@Override
@@ -83,31 +88,26 @@ public class SecurityRealm extends AuthorizingRealm {
 		UsernamePasswordToken token = (UsernamePasswordToken) authcToken;
 		String username = token.getUsername();
 
-		//logger.info("authenticating user: {}", username);
-
 		if (StringUtils.isEmpty(username)) {
 			throw new AccountException("Null usernames are not allowed.");
 		}
 
 		UserLogin user=null;
 		try {
-			//user = UserService.findByUserName(username);
-		} catch (BomcServiceException e) {
+			List<UserLogin> users = UserService.findByUserName(username);
+			if(users.size()>0)
+				user = users.get(0); 
+			else
+				throw new UnknownAccountException("账号名:["+username+"]不存在");
+		} catch (Exception e) {
 			throw new UnknownAccountException(e.getMessage());
 		}
-
-		SimpleAuthenticationInfo saInfo = new SimpleAuthenticationInfo(user,
-				user.getPassword(), getName());
-		// saInfo.setCredentialsSalt(ByteSource.Util.bytes(user.getSalt()));
-
+		
+		SimpleAuthenticationInfo saInfo = new SimpleAuthenticationInfo(user.getUserLoginId(),user.getPassword(), getName());
 		return saInfo;
 	}
 
-	/**
-	 * 清空用户关联权限认证，待下次使用时重新加载。
-	 * 
-	 * @param principal
-	 */
+
 	public void clearCachedAuthorizationInfo(String principal) {
 		SimplePrincipalCollection principals = new SimplePrincipalCollection(
 				principal, getName());
